@@ -3,15 +3,22 @@ import data from './Card.data.json'
 import './Card.css'
 import { $Card } from './styles'
 
-interface CardItemProps {
-  image: any,
-  label: any,
+export interface CardItemProps {
+  image:{
+    alt: string,
+    src: string,
+  },
+  label: {
+    text: string,
+  },
   title: string,
-  content: any
+  author: {
+    name: string,
+  },
 }
 
 const Card = (props: CardItemProps) => {
-  const { image, label, title, content } = data
+  const { image, label, title, author } = props
   return (
     <$Card>
       <div className="card__media">
@@ -27,7 +34,7 @@ const Card = (props: CardItemProps) => {
           {title}
         </h5>
 
-        <p className="card__description text text--16">{content?.text}</p>
+        <p className="card__description text text--16">{author.name}</p>
       </div>
     </$Card >
   )

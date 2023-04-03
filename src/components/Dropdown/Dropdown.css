@@ -28,21 +28,14 @@
   max-height: 1000px;
   opacity: 1;
 }
-.dropdown__list-item {
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  list-style: none;
-  padding: 15px;
-}
+
 .dropdown__list-item--active {
   background: #f4f4f4;
 }
 .dropdown__list-item:hover {
   background: #f4f4f4;
 }
-.dropdown__toggle {
-  background: #fff;
-}
+
 .dropdown__toggle:hover {
   background: #fff;
 }
