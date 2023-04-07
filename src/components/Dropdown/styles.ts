@@ -41,6 +41,11 @@ export const $Option = styled.li`
 height: 48px;
 width: 168px;
 border-radius: 18px;
+transition: max-height 0.6s ease-out;
+  max-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 `	
 {/** 
 .dropdown__list-item {

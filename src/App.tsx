@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Dropdown, Grid, Pagination } from './components';
+import { Card, Dropdown, Grid, Pagination, TestDropdown } from './components';
 import { CardItemProps } from './components/Card';
 
 import './App.css';
@@ -15,6 +15,10 @@ const options = [{
 },{
   label: 'Category 1',
   value: 'category1',
+}
+,{
+  label: 'Category 2',
+  value: 'category2',
 }
 ]
 
@@ -44,45 +48,43 @@ function App() {
   }, [])
 
   return (
-    <div className="App">
+    <div className="App" style={{display: "flex", justifyContent: "center",  flexDirection: "column"}}>
       <header className="App-header">
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          DeskNews
         </p>
       </header>
-
       <div style={{ paddingBlock: '25px' }}></div>
-
-      <section style={{ marginInline: '10%' }}>
-        <Dropdown filter={filter} options={options} setFilter={setFilter}/>
+      <section style={{ alignSelf:"center",marginInline: '10%', width: "80%"}}>
+        <TestDropdown filter={filter} setFilter={setFilter} options={options} />
       </section>
-
       {cardData.length === 0 && !requestError && (
+      <section style={{ marginTop:"5%",marginInline: '10%', width: "80%", display: "flex", justifyContent: "center" ,alignItems: "center"}}>
           <h2>Please wait for the request to be finished..</h2>
+      </section>
         )}
-      {requestError && (<h2>Something went wrong with the request..</h2>)}
+      {requestError && (
+      <section style={{ marginTop:"5%",marginInline: '10%', width: "80%", display: "flex", justifyContent: "center" ,alignItems: "center"}}>
+      <h2>Something went wrong with the request..</h2>
+      </section>)}
       <div style={{ paddingBlock: '25px' }}></div>
       {cardData.length > 0 && !requestError && (
       <Grid>
-        
         {cardData.map((card: CardItemProps, index) => {
           if (filter.currentPage === 1 && index < 8) {
             return <Card key={index+card.title} {...card} />
           }
         })}
       </Grid>)}
-      <div style={{ paddingBlock: '25px' }}></div>
-
       <div style={{ marginInline: '10%' }}>
         <Pagination
           className="pagination-bar"
           currentPage={filter.currentPage}
-          totalCount={100}
-          pageSize={16}
+          totalCount={cardData.length}
+          pageSize={8}
           onPageChange={(page: number) => setFilter({...filter, currentPage: page})}
         />
       </div>
-
       <div style={{ paddingBlock: '25px' }}></div>
     </div>
   );

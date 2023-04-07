@@ -1,7 +1,4 @@
-import clsx from 'clsx'
-import data from './Card.data.json'
-import './Card.css'
-import { $Card } from './styles'
+import { $Card, $Image ,$Title, $Label, $TextContainer, $Author} from './styles'
 
 export interface CardItemProps {
   image:{
@@ -17,25 +14,26 @@ export interface CardItemProps {
   },
 }
 
+const cropText = (text: string) => {
+  let maxLength: number;
+  window.innerWidth < 768 ? (maxLength = 45) : window.innerWidth < 992 ? (maxLength = 25) : (maxLength = 21)
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
+}
+
 const Card = (props: CardItemProps) => {
   const { image, label, title, author } = props
   return (
     <$Card>
-      <div className="card__media">
-        <img {...image} />
-      </div>
-
-      <div className={clsx('card__text -margin-top-16')}>
-        <span className="-margin-bottom-4" >
-          {label.text}
-        </span>
-
-        <h5 className="card__title -margin-bottom-4 -margin-bottom-sm-6 -margin-bottom-md-4 -margin-bottom-xl-6" >
-          {title}
-        </h5>
-
-        <p className="card__description text text--16">{author.name}</p>
-      </div>
+      <$Image {...image} />
+        <$TextContainer>
+          <$Label  >
+            {label.text}
+          </$Label>
+          <$Title >
+            {cropText(title)}
+          </$Title>
+          <$Author>{author.name}</$Author>
+        </$TextContainer>
     </$Card >
   )
 }
