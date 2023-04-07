@@ -4,10 +4,19 @@ import styled from 'styled-components';
 //min 700width works, need media for lower widths
 export const $FilterArea = styled.div`
 display: flex;
-flex-direction: row;
 width: 100%;
-justify-content: space-between;
-align-items: center;
+
+@media (min-width: 300px) {
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+@media (min-width: 700px) {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
 `;
 
 
@@ -47,6 +56,14 @@ display: flex;
 flex-direction: row;
 justify-content: space-between;
 align-items: center;
+
+@media (min-width: 300px) {
+  width: 100%;
+}
+
+@media (min-width: 700px) {
+  width: 30%;
+}
 `
 
 

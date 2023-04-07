@@ -16,8 +16,7 @@ export interface CardItemProps {
 }
 
 const cropText = (text: string) => {
-  let maxLength: number;
-  window.innerWidth < 768 ? (maxLength = 45) : window.innerWidth < 992 ? (maxLength = 25) : (maxLength = 21)
+  let maxLength = 22;
   return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
 }
 

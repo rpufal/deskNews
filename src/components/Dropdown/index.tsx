@@ -7,7 +7,6 @@ import {DropdownButton, DropdownContent, $Button, $FilterArea, $Input, $InputCon
 export const DropdownContainer = styled.div<{isOpen: boolean}>`
   position: relative;
   display: inline-block;
-  width: 30%;
   height: 48px;
   border-radius: 12px;
   border: 2px solid #8023f9;
@@ -24,6 +23,13 @@ export const DropdownContainer = styled.div<{isOpen: boolean}>`
       background-color: #8023f9;
       color: white;
     }
+  }
+
+  @media (min-width: 300px) {
+    width: 100%;
+  }
+  @media (min-width: 700px) {
+    width: 30%;
   }
   `;
 
