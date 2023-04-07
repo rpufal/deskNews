@@ -12,6 +12,7 @@ export interface CardItemProps {
   author: {
     name: string,
   },
+  date: string,
 }
 
 const cropText = (text: string) => {
@@ -21,7 +22,7 @@ const cropText = (text: string) => {
 }
 
 const Card = (props: CardItemProps) => {
-  const { image, label, title, author } = props
+  const { image, label, title, author, date } = props
   return (
     <$Card>
       <$Image {...image} />
@@ -32,7 +33,7 @@ const Card = (props: CardItemProps) => {
           <$Title >
             {cropText(title)}
           </$Title>
-          <$Author>{author.name}</$Author>
+          <$Author>{author.name} - {date}</$Author>
         </$TextContainer>
     </$Card >
   )

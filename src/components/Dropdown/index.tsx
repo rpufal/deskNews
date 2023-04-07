@@ -1,83 +1,162 @@
-import clsx from 'clsx';
-import { useState } from 'react';
-import { $FilterArea, $Input, $Button, $Select, $Option } from './styles';
-//import Select from 'react-select';
-//import data from './Dropdown.data.json';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import {DropdownButton, DropdownContent, $Button, $FilterArea, $Input, $InputContainer} from "./styles"
 
-import './Dropdown.css';
+//babel plugin for compiling styled components messing up styled types
 
-type filter ={
-    category: string;
-    keyWord: string;
-}
+export const DropdownContainer = styled.div<{isOpen: boolean}>`
+  position: relative;
+  display: inline-block;
+  width: 30%;
+  height: 48px;
+  border-radius: 12px;
+  border: 2px solid #8023f9;
+  background-color: ${({isOpen}) => isOpen ? "#8023f9": "white"};
+  color: ${({isOpen}) => isOpen ? "white" : "#8023f9"};
+  :hover  {
+    background-color: #8023f9;
+    color: white;
+  }
+  button {
+    background-color: ${({isOpen}) => isOpen ? "#8023f9": "white"};
+    color: ${({isOpen}) => isOpen ? "white" : "#8023f9"};
+    :hover  {
+      background-color: #8023f9;
+      color: white;
+    }
+  }
+  `;
+
+export const DropdownItem = styled.div<{last: boolean, first: boolean}>`
+  color: black;
+  padding: 12px 0px;
+  width: 100%;
+  text-decoration: none;
+  min-width: 160px;
+  cursor: pointer;
+  z-index: 999;
+  border-top-left-radius: ${({first}) => first ? "20px" : "0px"};
+  border-top-right-radius: ${({first}) => first ? "20px" : "0px"};
+  border-bottom-left-radius: ${({last}) => last ? "20px" : "0px"};
+  border-bottom-right-radius: ${({last}) => last ? "20px" : "0px"};
+  &:hover {
+    background-color: #8023f9;
+    color: white;
+  }
+  border-bottom: ${({last}) => last ? "0px" : "1px solid lightgrey" };
+`;
+
+
+
+//
 
 export interface DropdownProps {
-  filter: {
-    category: string;
-    keyWord: string;
-  },
-  setFilter: React.Dispatch<React.SetStateAction<any>>,
-  options: {
-    label: string;
-    value: string;
-  }[],
-}
+    filter: {
+      category: string;
+      keyWord: string;
+      date: string;
+      reset: boolean;
+      currentPage: number;
+    },
+    setFilter: React.Dispatch<React.SetStateAction<any>>,
+    optionsA: {
+      label: string;
+      value: string;
+    }[],
+    optionsB: {
+      label: string;
+      value: string;
+    }[],
+  }
 
-const Dropdown = (props: DropdownProps) => {
+
+const Dropdown = ( props: DropdownProps ) => {
+  const {optionsA, optionsB, setFilter, filter} = props;
   const [input, setInput] = useState("")
   const [state, setState] = useState({
-    open: false,
-    selected: -1,
-    active: false,
+    openA: false,
+    openB: false,
+    selectedA: {
+        label: "",
+        value: ""
+    },
+    selectedB: {
+      label: "",
+      value: ""
+  },
   })
 
-  const toggleDropdown = () => {
-    setState({ ...state, active: !state.active })
-  }
+  useEffect(() => {
+    if (filter.reset) {
+      setState({
+        openA: false,
+        openB: false,
+        selectedA: {
+            label: "",
+            value: ""
+        },
+        selectedB: {
+          label: "",
+          value: ""
+      },
+      })
+      setFilter({...filter, reset: false})
+    }
+  }, [filter.reset])
 
-  const handleClick = (i: number) => {
-    setState({
-      ...state,
-      active: !state.active,
-      selected: i
-    })
+  const handleOpenClose = (type: "A" | "B") => {
+    type === "A" ? setState({ ...state, openA: !state.openA }) : setState({ ...state, openB: !state.openB });
+  };
+
+  const handleSelectOption = (type: "A" | "B", option: {value: string, label: string}) => {
+    if (type === "A") {
+      setState({...state, openA: false, selectedA: option})
+      setFilter({...filter, category: option.value, reset: false, currentPage: 1})
+    } else {
+      setState({...state, openB: false, selectedB: option})
+      setFilter({...filter, date: option.value, reset: false, currentPage: 1})
+    }
   }
+  
   return (
     <$FilterArea>
-      <div>
-        <$Input placeholder="Search here..." onChange={({target}) => setInput(target.value)} />
-        <$Button onClick={() => props.setFilter({...props.filter, keyWord: input})}>Enter</$Button>
-      </div>
-      {/* 
-      <$Select>
-        {props.options.map((option, index) => (
-          <$Option key={index+option.value} value={option.value}>{option.label}</$Option>
-        ))}
-      </$Select>*/}
-      <$Select className="dropdown">
-        <$Select
-          onClick={() => toggleDropdown()}
-          className="dropdown__toggle dropdown__list-item"
-        >
-          Categories
-          {/*<i className="fa fa-angle-down" aria-hidden="true"></i>*/}
-        </$Select>
-
-        <ul className={clsx("dropdown__list", state.active && 'dropdown__list--active')}>
-          {props.options.map((option, i) => (
-            <$Option
-              key={i+option.value}
-              onClick={evt => handleClick(i)}
-              className={clsx("dropdown__list-item", i === state.selected && 'dropdown__list-item--active')}
-              value={option.value}
-            >
-              {option.label}
-            </$Option>
-          ))}
-        </ul>
-      </$Select >
+        <$InputContainer>
+          <$Input placeholder="Search here..." value={input} onChange={({target}) => setInput(target.value)} />
+          <$Button onClick={() => {
+            props.setFilter({...props.filter, keyWord: input, reset: false})
+            setInput("")
+            }}>Enter</$Button>
+        </$InputContainer>
+        <DropdownContainer isOpen={state.openA}>
+          <DropdownButton  onClick={() => handleOpenClose("A")}>
+              {state.selectedA.value && !state.openA ? state.selectedA.label : "Select an option"}
+          </DropdownButton>
+          {state.openA &&
+              <DropdownContent>
+              {optionsA.map((option, index) => (
+                  <DropdownItem first={index === 0} last={index === (optionsA.length - 1)}  key={index+option.label} onClick={() => handleSelectOption("A", option)}>
+                  {option.label}
+                  </DropdownItem>
+              ))}
+              </DropdownContent>
+          }
+        </DropdownContainer>
+        <DropdownContainer isOpen={state.openB}>
+          <DropdownButton   onClick={() => handleOpenClose("B")}>
+              {state.selectedB.value && !state.openB ? state.selectedB.label : "Select an option"}
+          </DropdownButton>
+          {state.openB &&
+              <DropdownContent>
+              {optionsB.map((option, index) => (
+                  <DropdownItem first={index === 0} last={index === (optionsB.length - 1)}  key={index+option.label} onClick={() => handleSelectOption("B", option)}>
+                  {option.label}
+                  </DropdownItem>
+              ))}
+              </DropdownContent>
+          }
+        </DropdownContainer>
     </$FilterArea>
-  )
-}
+  );
+};
 
-export default Dropdown
+export default Dropdown;

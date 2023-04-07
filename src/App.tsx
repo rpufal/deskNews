@@ -1,36 +1,110 @@
 import { useState, useEffect } from 'react';
-import { Card, Dropdown, Grid, Pagination, TestDropdown } from './components';
+import { Card, Grid, Pagination, Dropdown } from './components';
 import { CardItemProps } from './components/Card';
+import { $Warning, $FilterSection,
+  $WarningSection, $ResetButton, $App, $Header, $H1 } from './styles';
 
-import './App.css';
 
-interface CardData {
-  list: CardItemProps[]
-  empty: boolean
-}
 
-const options = [{
+const optionsB = [{
   label: 'All',
   value: 'all',
+},
+{
+  label: 'Last Week',
+  value: 'lastWeek',
 },{
-  label: 'Category 1',
-  value: 'category1',
-}
-,{
-  label: 'Category 2',
-  value: 'category2',
+  label: 'Last Month',
+  value: 'lastMonth',
 }
 ]
 
+const filterByCategory = (category: string, data: CardItemProps[]) => {
+  return data.filter((data: CardItemProps) => {
+    if (category === "all") {
+      return true
+    } else if (data.label.text === category) {
+      return true
+    }	
+  })
+}
+const filterByDate = (date: string, data: CardItemProps[]) => {
+  return data.filter((data: CardItemProps) => {
+    if (date === "all") {
+      return true
+    } else if (date === "lastWeek") {
+      return new Date(data.date) > new Date(new Date().setDate(new Date().getDate() - 7))
+    } else if (date === "lastMonth") {
+      return new Date(data.date) > new Date(new Date().setDate(new Date().getDate() - 30))
+    }
+  })
+}
+
+const filterByKeyWord = (keyWord: string, data: CardItemProps[]) => {
+  return data.filter((data: CardItemProps) => {
+    if (data.title.toLowerCase().includes(keyWord.toLowerCase())) {
+      return true
+    }
+  })
+}
+
+const pageSize = () => {
+  return  window.innerWidth <= 768 ? 4 : window.innerWidth <= 992 ? 6 : 8 
+ }
+
+
 function App() {
-  const [cardData, setCardData] = useState([])
+  const [cardData, setCardData] = useState<{
+    fetchedData: CardItemProps[];
+    filteredData: CardItemProps[];
+  }>({
+    fetchedData: [],
+    filteredData: [],
+  });  const [categoriesOptions, setCategoriesOptions] = useState([{label: "All categories", value: "all"}])
   const [filter, setFilter] = useState({
     currentPage: 1,
-    pageSize: 8,
+    pageSize: pageSize(),
     category: "",
+    date: "",
     keyWord: "",
+    reset: false
   })
   const [requestError , setRequestError] = useState(false)
+  const resetFilters = () => {
+    setFilter({
+      currentPage: 1,
+      pageSize: pageSize(),
+      category: "",
+      date: "",
+      keyWord: "",
+      reset: true,
+    })
+  }
+
+ 
+  useEffect(() => {
+    const {category, date, keyWord} = filter
+    if (category && (!date || date === "all")) {
+      setCardData({...cardData, filteredData: filterByCategory(category, cardData.fetchedData)})
+    }
+    if (date && category) {
+      setCardData({...cardData, filteredData: filterByDate(date, filterByCategory(category, cardData.fetchedData))})
+    } else if (date && (!category || category === "all")) {
+      setCardData({...cardData, filteredData: filterByDate(date, cardData.fetchedData)})
+    }
+    if (keyWord  && (!category && !date)) {
+      setCardData({...cardData, filteredData: filterByKeyWord(keyWord, cardData.fetchedData)})
+    }
+    if (keyWord && date) {
+      setCardData({...cardData, filteredData: filterByKeyWord(keyWord, filterByDate(date, category ? filterByCategory(category, cardData.fetchedData) : cardData.fetchedData ))})
+    }
+    if (keyWord && category && !date) {
+      setCardData({...cardData, filteredData: filterByKeyWord(keyWord, filterByCategory(category, cardData.fetchedData))})
+    }
+    if (!category && !date && !keyWord) {
+      setCardData({...cardData, filteredData: cardData.fetchedData})
+    }
+  }, [filter])
 
   useEffect(() => {
     fetch('https://cms.talkdesk.com/wp-json/web-api/v1/content/cards')
@@ -39,7 +113,9 @@ function App() {
         return response.json()
       })
       .then(({data}) => {
-        setCardData(data.list) 
+        const options = [... new Set(data.list.map(({ label: { text } }: {label: {text: string}}) => text))];
+        setCategoriesOptions([categoriesOptions[0] ,...options.map((option) => ({value: option, label: option})) as {label: string, value: string}[]])
+        setCardData({fetchedData: data.list, filteredData: data.list}) 
       })
       .catch(error => {
         console.log(error)
@@ -47,46 +123,47 @@ function App() {
       })
   }, [])
 
+  
+
   return (
-    <div className="App" style={{display: "flex", justifyContent: "center",  flexDirection: "column"}}>
-      <header className="App-header">
-        <p>
-          DeskNews
-        </p>
-      </header>
-      <div style={{ paddingBlock: '25px' }}></div>
-      <section style={{ alignSelf:"center",marginInline: '10%', width: "80%"}}>
-        <TestDropdown filter={filter} setFilter={setFilter} options={options} />
-      </section>
-      {cardData.length === 0 && !requestError && (
-      <section style={{ marginTop:"5%",marginInline: '10%', width: "80%", display: "flex", justifyContent: "center" ,alignItems: "center"}}>
-          <h2>Please wait for the request to be finished..</h2>
-      </section>
+    <$App>
+      <$Header>
+        <$H1>Read about the most innovative stories at DeskNews</$H1>
+      </$Header>
+      <$FilterSection>
+        <Dropdown filter={filter} setFilter={setFilter} optionsA={categoriesOptions} optionsB={optionsB} />
+      </$FilterSection>
+      {cardData.fetchedData.length === 0 && !requestError && (
+      <$WarningSection>
+        <$Warning>Please wait for the request to be finished..</$Warning>
+      </$WarningSection>
+        )}
+      {cardData.fetchedData.length >  0 && cardData.filteredData.length === 0 && !requestError && (
+      <$WarningSection>
+        <$Warning>There are no results.</$Warning>
+        <$Warning>Please, try different search words</$Warning>
+        <$ResetButton onClick={resetFilters}>Reset Filters</$ResetButton>
+      </$WarningSection>
         )}
       {requestError && (
-      <section style={{ marginTop:"5%",marginInline: '10%', width: "80%", display: "flex", justifyContent: "center" ,alignItems: "center"}}>
-      <h2>Something went wrong with the request..</h2>
-      </section>)}
-      <div style={{ paddingBlock: '25px' }}></div>
-      {cardData.length > 0 && !requestError && (
+      <$WarningSection>
+        <$Warning>Something went wrong with the request..</$Warning>
+      </$WarningSection>)}
+      {cardData.filteredData.length > 0 && !requestError && (
       <Grid>
-        {cardData.map((card: CardItemProps, index) => {
-          if (filter.currentPage === 1 && index < 8) {
-            return <Card key={index+card.title} {...card} />
+        {cardData.filteredData.map((card: CardItemProps, index) => {
+          if (index >= (filter.currentPage - 1) * filter.pageSize && index < filter.currentPage * filter.pageSize) {
+              return <Card key={index+card.title} {...card} />
           }
         })}
       </Grid>)}
-      <div style={{ marginInline: '10%' }}>
         <Pagination
-          className="pagination-bar"
           currentPage={filter.currentPage}
-          totalCount={cardData.length}
-          pageSize={8}
+          totalCount={cardData.filteredData.length}
+          pageSize={pageSize()}
           onPageChange={(page: number) => setFilter({...filter, currentPage: page})}
         />
-      </div>
-      <div style={{ paddingBlock: '25px' }}></div>
-    </div>
+    </$App>
   );
 }
 
