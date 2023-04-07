@@ -27,6 +27,7 @@ export const DropdownContainer = styled.div<{isOpen: boolean}>`
 
   @media (min-width: 300px) {
     width: 100%;
+    margin-bottom: 10px;
   }
   @media (min-width: 700px) {
     width: 30%;

@@ -59,6 +59,7 @@ align-items: center;
 
 @media (min-width: 300px) {
   width: 100%;
+  margin-bottom: 10px;
 }
 
 @media (min-width: 700px) {
