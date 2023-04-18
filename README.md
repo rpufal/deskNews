@@ -36,11 +36,46 @@ v18.15.0
 
 ## Example
 
-Use talkdesk.com/customers as an example.
+Mimic Talkdesk [/customers](https://www.talkdesk.com/customers) page, using all 3 dropdowns and pagination as filters.
+
+For debugging, use browser network tab to see the payload for the API.
 
 ## API
 
-https://cms.talkdesk.com/wp-json/web-api/v1/content/cards
+```javascript
+var myHeaders = new Headers();
+myHeaders.append('Content-Type', 'application/json');
+
+var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: raw,
+  redirect: 'follow',
+};
+
+fetch(
+  'https://cms.talkdesk.com/wp-json/web-api/v1/content/cards',
+  requestOptions
+)
+  .then((response) => response.text())
+  .then((result) => console.log(result))
+  .catch((error) => console.log('error', error));
+
+// this payload will return 1 card
+var raw = JSON.stringify({
+  category: [],
+  industry: 'information-technology-services',
+  integration: 'api',
+  limit: 20,
+  order: 'ASC',
+  order_by: 'title',
+  page: 1,
+  post_type: ['customers'],
+  region: 'emea',
+  search: '',
+});
+
+```
 
 ## Available Scripts
 
