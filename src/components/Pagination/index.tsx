@@ -1,4 +1,4 @@
-import {usePagination } from './usePagination';
+import {usePagination, DOTS} from './usePagination';
 import styled from 'styled-components';
 import { $UL } from './styles';
 
@@ -66,10 +66,13 @@ const Pagination = (props: PaginationProps) => {
 
   return (
     <$UL>
-      {paginationRange.map((pageNumber, index) => {
+      {paginationRange.map((pageNumber: string | number, index) => {
         return (
           <$li
-            onClick={() => onPageChange(pageNumber)}
+            onClick={ () => {
+              pageNumber !== DOTS && onPageChange(pageNumber as number)
+              pageNumber === DOTS  && onPageChange(index < 3 ? 1 + 1 : paginationRange.length - 1)
+            }}
             key={index}
             selected={pageNumber === currentPage}
           >

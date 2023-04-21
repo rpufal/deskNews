@@ -3,70 +3,27 @@ import { Card, Grid, Pagination, Dropdown } from './components';
 import { CardItemProps } from './components/Card';
 import { $Warning, $FilterSection,
   $WarningSection, $ResetButton, $App, $Header, $H1 } from './styles';
-
-
-
-const optionsB = [{
-  label: 'All',
-  value: 'all',
-},
-{
-  label: 'Last Week',
-  value: 'lastWeek',
-},{
-  label: 'Last Month',
-  value: 'lastMonth',
-}
-]
-
-const filterByCategory = (category: string, data: CardItemProps[]) => {
-  return data.filter((data: CardItemProps) => {
-    if (category === "all") {
-      return true
-    } else if (data.label.text === category) {
-      return true
-    }	
-  })
-}
-const filterByDate = (date: string, data: CardItemProps[]) => {
-  return data.filter((data: CardItemProps) => {
-    if (date === "all") {
-      return true
-    } else if (date === "lastWeek") {
-      return new Date(data.date) > new Date(new Date().setDate(new Date().getDate() - 7))
-    } else if (date === "lastMonth") {
-      return new Date(data.date) > new Date(new Date().setDate(new Date().getDate() - 30))
-    }
-  })
-}
-
-const filterByKeyWord = (keyWord: string, data: CardItemProps[]) => {
-  return data.filter((data: CardItemProps) => {
-    if (data.title.toLowerCase().includes(keyWord.toLowerCase())) {
-      return true
-    }
-  })
-}
-
-const pageSize = () => {
-  return  window.innerWidth <= 768 ? 4 : window.innerWidth <= 992 ? 6 : 8 
- }
+import {optionsRegions, pageSize, optionsIndustry, optionsIntegrations } from './utils';
 
 
 function App() {
   const [cardData, setCardData] = useState<{
     fetchedData: CardItemProps[];
     filteredData: CardItemProps[];
+    fetching: boolean
   }>({
     fetchedData: [],
     filteredData: [],
-  });  const [categoriesOptions, setCategoriesOptions] = useState([{label: "All categories", value: "all"}])
+    fetching: false,
+  });  
   const [filter, setFilter] = useState({
     currentPage: 1,
     pageSize: pageSize(),
-    category: "",
+    industry: "",
     date: "",
     keyWord: "",
+    integration: "",
+    region: "",
     reset: false
   })
   const [requestError , setRequestError] = useState(false)
@@ -74,54 +31,57 @@ function App() {
     setFilter({
       currentPage: 1,
       pageSize: pageSize(),
-      category: "",
+      industry: "",
       date: "",
       keyWord: "",
+      integration: "",
+      region: "",
       reset: true,
     })
   }
-
+  const handleApiCall = (body:BodyInit ) => {
+    const myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json');
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: body,
+      redirect: 'follow' as RequestRedirect,
+    };
+    fetch('https://cms.talkdesk.com/wp-json/web-api/v1/content/cards', requestOptions)
+        .then(async response => {
+          if (!response.ok) throw new Error('Something went wrong with the request')
+          return response.json()
+        })
+        .then(({data}) => {
+          setCardData({fetchedData: data.list, filteredData: data.list, fetching: false}) 
+        })
+        .catch(error => {
+          console.log(error)
+          setCardData({...cardData, fetching: false})
+          setRequestError(true)
+        })
+  }
  
   useEffect(() => {
-    const {category, date, keyWord} = filter
-    if (category && (!date || date === "all")) {
-      setCardData({...cardData, filteredData: filterByCategory(category, cardData.fetchedData)})
-    }
-    if (date && category) {
-      setCardData({...cardData, filteredData: filterByDate(date, filterByCategory(category, cardData.fetchedData))})
-    } else if (date && (!category || category === "all")) {
-      setCardData({...cardData, filteredData: filterByDate(date, cardData.fetchedData)})
-    }
-    if (keyWord  && (!category && !date)) {
-      setCardData({...cardData, filteredData: filterByKeyWord(keyWord, cardData.fetchedData)})
-    }
-    if (keyWord && date) {
-      setCardData({...cardData, filteredData: filterByKeyWord(keyWord, filterByDate(date, category ? filterByCategory(category, cardData.fetchedData) : cardData.fetchedData ))})
-    }
-    if (keyWord && category && !date) {
-      setCardData({...cardData, filteredData: filterByKeyWord(keyWord, filterByCategory(category, cardData.fetchedData))})
-    }
-    if (!category && !date && !keyWord) {
-      setCardData({...cardData, filteredData: cardData.fetchedData})
-    }
+    const {industry, integration, region, keyWord} = filter
+    const updatedBody = JSON.stringify({
+      category: [],
+      integration: integration,
+      limit: 40,
+      order: 'ASC',
+      order_by: 'title',
+      page: 1,
+      post_type: ["customers"],
+      search: keyWord,
+      industry: industry,
+      region: region
+    });
+    setCardData({...cardData, fetching: true})
+    handleApiCall(updatedBody)
   }, [filter])
 
-  useEffect(() => {
-    fetch('https://cms.talkdesk.com/wp-json/web-api/v1/content/cards')
-      .then(async response => {
-        if (!response.ok) throw new Error('Something went wrong with the request')
-        return response.json()
-      })
-      .then(({data}) => {
-        const options = [... new Set(data.list.map(({ label: { text } }: {label: {text: string}}) => text))];
-        setCategoriesOptions([categoriesOptions[0] ,...options.map((option) => ({value: option, label: option})) as {label: string, value: string}[]])
-        setCardData({fetchedData: data.list, filteredData: data.list}) 
-      })
-      .catch(error => {
-        console.log(error)
-        setRequestError(true)
-      })
-  }, [])
+  
 
   
 
@@ -131,14 +91,14 @@ function App() {
         <$H1>Read about the most innovative stories at DeskNews</$H1>
       </$Header>
       <$FilterSection>
-        <Dropdown filter={filter} setFilter={setFilter} optionsA={categoriesOptions} optionsB={optionsB} />
+        <Dropdown filter={filter} setFilter={setFilter} optionsIntegrations={optionsIntegrations} optionsIndustry={optionsIndustry} optionsRegions={optionsRegions} />
       </$FilterSection>
-      {cardData.fetchedData.length === 0 && !requestError && (
+      {cardData.fetching && !requestError && (
       <$WarningSection>
         <$Warning>Please wait for the request to be finished..</$Warning>
       </$WarningSection>
         )}
-      {cardData.fetchedData.length >  0 && cardData.filteredData.length === 0 && !requestError && (
+      {cardData.fetchedData.length ===  0 && !cardData.fetching && !requestError && (
       <$WarningSection>
         <$Warning>There are no results.</$Warning>
         <$Warning>Please, try different search words</$Warning>
@@ -149,7 +109,7 @@ function App() {
       <$WarningSection>
         <$Warning>Something went wrong with the request..</$Warning>
       </$WarningSection>)}
-      {cardData.filteredData.length > 0 && !requestError && (
+      {cardData.filteredData.length > 0 && !cardData.fetching && !requestError && (
       <Grid>
         {cardData.filteredData.map((card: CardItemProps, index) => {
           if (index >= (filter.currentPage - 1) * filter.pageSize && index < filter.currentPage * filter.pageSize) {

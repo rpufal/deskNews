@@ -50,7 +50,7 @@ padding-left: 16px;
 }
 `
 export const $InputContainer = styled.div`
-width: 30%;
+width: 23%;
 height: 48px;
 display: flex;
 flex-direction: row;
@@ -63,7 +63,7 @@ align-items: center;
 }
 
 @media (min-width: 700px) {
-  width: 30%;
+  width: 23%;
 }
 `
 

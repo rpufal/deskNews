@@ -1,6 +1,7 @@
 
 import { render } from '@testing-library/react';
 import  Card  from '../components/Card';
+import { formatDate } from '../utils';
 import '@testing-library/jest-dom/extend-expect';
 
 
@@ -14,10 +15,7 @@ describe('Card', () => {
           text: 'Example Label',
         },
         title: 'The Perks of Testing',
-        author: {
-          name: 'JR Tolkien',
-        },
-        date: '2023-04-07',
+        datetime: '2023-04-07',
       };
   it('renders the component with the default testing props', () => {
     const { getByAltText, getByText } = render(<Card {...defaultProps}/>);
@@ -28,7 +26,7 @@ describe('Card', () => {
     );
     expect(getByText('Example Label')).toBeInTheDocument();
     expect(getByText('The Perks of Testing')).toBeInTheDocument();
-    expect(getByText('JR Tolkien - 2023-04-07')).toBeInTheDocument();
+    expect(getByText(formatDate('2023-04-07'))).toBeInTheDocument();
   });
 
 
@@ -46,10 +44,10 @@ describe('Card', () => {
     expect(queryByText('Example Label')).not.toBeInTheDocument();
   });
 
-  it('handles missing author name', () => {
+  it('handles missed date value', () => {
     const props = { ...defaultProps };
-    delete props.author.name;
+    delete props.datetime;
     const { queryByText } = render(<Card {...props} />);
-    expect(queryByText('JR Tolkien')).not.toBeInTheDocument();
+    expect(queryByText(formatDate('2023-04-07'))).not.toBeInTheDocument();
   });
 });

@@ -1,4 +1,5 @@
 import { $Card, $Image ,$Title, $Label, $TextContainer, $Author} from './styles'
+import { cropText, formatDate } from '../../utils'
 
 export interface CardItemProps {
   image:{
@@ -12,16 +13,14 @@ export interface CardItemProps {
   author: {
     name: string,
   },
-  date: string,
+  datetime: string,
 }
 
-const cropText = (text: string) => {
-  let maxLength = 22;
-  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
-}
+
+
 
 const Card = (props: CardItemProps) => {
-  const { image, label, title, author, date } = props
+  const { image, label, title, author, datetime } = props
   return (
     <$Card>
       <$Image {...image} />
@@ -32,7 +31,7 @@ const Card = (props: CardItemProps) => {
           <$Title >
             {cropText(title)}
           </$Title>
-          <$Author>{author.name} - {date}</$Author>
+          <$Author>{datetime ? formatDate(datetime) : "Unknown"}</$Author>
         </$TextContainer>
     </$Card >
   )

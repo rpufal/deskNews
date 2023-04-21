@@ -30,7 +30,7 @@ export const DropdownContainer = styled.div<{isOpen: boolean}>`
     margin-bottom: 10px;
   }
   @media (min-width: 700px) {
-    width: 30%;
+    width: 23%;
   }
   `;
 
@@ -57,71 +57,85 @@ export const DropdownItem = styled.div<{last: boolean, first: boolean}>`
 
 //
 
+type optionObject = {label: string, value: string}
+
 export interface DropdownProps {
     filter: {
-      category: string;
       keyWord: string;
       date: string;
       reset: boolean;
       currentPage: number;
+      industry: string;
+      region: string;
+      integration: string;
     },
     setFilter: React.Dispatch<React.SetStateAction<any>>,
-    optionsA: {
-      label: string;
-      value: string;
-    }[],
-    optionsB: {
-      label: string;
-      value: string;
-    }[],
+    optionsIntegrations: optionObject[],
+    optionsIndustry: optionObject[],
+    optionsRegions: optionObject[],
   }
 
 
 const Dropdown = ( props: DropdownProps ) => {
-  const {optionsA, optionsB, setFilter, filter} = props;
+  const {optionsIndustry, optionsIntegrations,optionsRegions, setFilter, filter} = props;
   const [input, setInput] = useState("")
   const [state, setState] = useState({
-    openA: false,
-    openB: false,
-    selectedA: {
+    openIndustry: false,
+    openIntegration: false,
+    openRegion: false,
+    selectedIndustry: {
         label: "",
         value: ""
     },
-    selectedB: {
+    selectedIntegration: {
       label: "",
       value: ""
-  },
+    },
+    selectedRegion: {
+      label: "",
+      value: ""
+    },
   })
 
   useEffect(() => {
     if (filter.reset) {
       setState({
-        openA: false,
-        openB: false,
-        selectedA: {
+        openIndustry: false,
+        openIntegration: false,
+        openRegion: false,
+        selectedIndustry: {
             label: "",
             value: ""
         },
-        selectedB: {
+        selectedIntegration: {
           label: "",
           value: ""
-      },
+        },
+        selectedRegion: {
+          label: "",
+          value: ""
+        },
       })
       setFilter({...filter, reset: false})
     }
   }, [filter.reset])
 
-  const handleOpenClose = (type: "A" | "B") => {
-    type === "A" ? setState({ ...state, openA: !state.openA }) : setState({ ...state, openB: !state.openB });
+  const handleOpenClose = (type: "industry" | "integration" | "region") => {
+    type === "industry" ? setState({ ...state, openIndustry: !state.openIndustry }) 
+    : type === "integration"? setState({ ...state, openIntegration: !state.openIntegration }) 
+    : setState({ ...state, openRegion: !state.openRegion });
   };
 
-  const handleSelectOption = (type: "A" | "B", option: {value: string, label: string}) => {
-    if (type === "A") {
-      setState({...state, openA: false, selectedA: option})
-      setFilter({...filter, category: option.value, reset: false, currentPage: 1})
+  const handleSelectOption = (type: "industry" | "integration" | "region", option: {value: string, label: string}) => {
+    if (type === "industry") {
+      setState({...state, openIndustry: false, selectedIndustry: option})
+      setFilter({...filter, industry: option.value, reset: false, currentPage: 1})
+    } else if (type === "integration") {
+      setState({...state, openIntegration: false, selectedIntegration: option})
+      setFilter({...filter, integration: option.value, reset: false, currentPage: 1})
     } else {
-      setState({...state, openB: false, selectedB: option})
-      setFilter({...filter, date: option.value, reset: false, currentPage: 1})
+      setState({...state, openRegion: false, selectedRegion: option})
+      setFilter({...filter, region: option.value, reset: false, currentPage: 1})
     }
   }
   
@@ -134,28 +148,42 @@ const Dropdown = ( props: DropdownProps ) => {
             setInput("")
             }}>Enter</$Button>
         </$InputContainer>
-        <DropdownContainer isOpen={state.openA}>
-          <DropdownButton  onClick={() => handleOpenClose("A")}>
-              {state.selectedA.value && !state.openA ? state.selectedA.label : "Select an option"}
+        <DropdownContainer isOpen={state.openIndustry}>
+          <DropdownButton  onClick={() => handleOpenClose("industry")}>
+              {state.selectedIndustry.value && !state.openIndustry ? state.selectedIndustry.label : "Select an industry"}
           </DropdownButton>
-          {state.openA &&
+          {state.openIndustry &&
               <DropdownContent>
-              {optionsA.map((option, index) => (
-                  <DropdownItem first={index === 0} last={index === (optionsA.length - 1)}  key={index+option.label} onClick={() => handleSelectOption("A", option)}>
+              {optionsIndustry.map((option, index) => (
+                  <DropdownItem first={index === 0} last={index === (optionsIndustry.length - 1)}  key={index+option.label} onClick={() => handleSelectOption("industry", option)}>
                   {option.label}
                   </DropdownItem>
               ))}
               </DropdownContent>
           }
         </DropdownContainer>
-        <DropdownContainer isOpen={state.openB}>
-          <DropdownButton   onClick={() => handleOpenClose("B")}>
-              {state.selectedB.value && !state.openB ? state.selectedB.label : "Select an option"}
+        <DropdownContainer isOpen={state.openIntegration}>
+          <DropdownButton   onClick={() => handleOpenClose("region")}>
+              {state.selectedRegion.value && !state.openRegion ? state.selectedRegion.label : "Select a region"}
           </DropdownButton>
-          {state.openB &&
+          {state.openRegion &&
               <DropdownContent>
-              {optionsB.map((option, index) => (
-                  <DropdownItem first={index === 0} last={index === (optionsB.length - 1)}  key={index+option.label} onClick={() => handleSelectOption("B", option)}>
+              {optionsRegions.map((option, index) => (
+                  <DropdownItem first={index === 0} last={index === (optionsRegions.length - 1)}  key={index+option.label} onClick={() => handleSelectOption("region", option)}>
+                  {option.label}
+                  </DropdownItem>
+              ))}
+              </DropdownContent>
+          }
+        </DropdownContainer>
+        <DropdownContainer isOpen={state.openIntegration}>
+          <DropdownButton   onClick={() => handleOpenClose("integration")}>
+              {state.selectedIntegration.value && !state.openIntegration ? state.selectedIntegration.label : "Select an integration"}
+          </DropdownButton>
+          {state.openIntegration &&
+              <DropdownContent>
+              {optionsIntegrations.map((option, index) => (
+                  <DropdownItem first={index === 0} last={index === (optionsIntegrations.length - 1)}  key={index+option.label} onClick={() => handleSelectOption("integration", option)}>
                   {option.label}
                   </DropdownItem>
               ))}
