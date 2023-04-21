@@ -11,7 +11,7 @@ width: 100%;
   justify-content: space-between;
   align-items: flex-start;
 }
-@media (min-width: 700px) {
+@media (min-width: 900px) {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
@@ -62,7 +62,9 @@ align-items: center;
   margin-bottom: 10px;
 }
 
-@media (min-width: 700px) {
+
+
+@media (min-width: 900px) {
   width: 23%;
 }
 `
@@ -71,15 +73,17 @@ align-items: center;
 
   export const DropdownButton = styled.button`
   padding: 12px;
-  font-size: 16px;
+  font-size: 14px;
   border: none;
   border-radius: 12px;
   cursor: pointer;
   min-width: 160px;
   width: 100%;
   height: 48px;
-
-`;
+  display: inline-flex;
+  align-items: center; 
+  justify-content: center;
+  `;
 
 export const DropdownContent = styled.div`
   display: flex;

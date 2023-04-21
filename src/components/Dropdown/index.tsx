@@ -29,7 +29,8 @@ export const DropdownContainer = styled.div<{isOpen: boolean}>`
     width: 100%;
     margin-bottom: 10px;
   }
-  @media (min-width: 700px) {
+  
+  @media (min-width: 900px) {
     width: 23%;
   }
   `;
@@ -162,7 +163,7 @@ const Dropdown = ( props: DropdownProps ) => {
               </DropdownContent>
           }
         </DropdownContainer>
-        <DropdownContainer isOpen={state.openIntegration}>
+        <DropdownContainer isOpen={state.openRegion}>
           <DropdownButton   onClick={() => handleOpenClose("region")}>
               {state.selectedRegion.value && !state.openRegion ? state.selectedRegion.label : "Select a region"}
           </DropdownButton>
